@@ -10,23 +10,25 @@ LIST_FILE="./list.txt"
 
 if [ ! -f "./list.txt" ] ; then
 	echo "    NAME        MODEL                          PROVIDER       STREAM " >> list.txt
-else
-	echo "already created"
+#else
+	#echo "already created"
 fi
 
 if [ "$1" == '--help' ] ; then
 	echo "Askii is a cli app to interact with llm."
-	echo "You can add one model with askii -add."
-	echo "With -get, you will see a tutorial to learn how to get free AI api keys."
-	echo "If you want audio answers, type askii -sound"
+	echo "You can add one model with ./main.sh -add."
+	echo "With ./main.sh -get, you will see a tutorial to learn how to get free AI api keys."
+	# echo "If you want audio answers, type askii -sound"
 elif [ "$1" == '-add' ] ; then
-	read -p "You want to use your model with [OpenRouter]: " answer
-	case "$answer" in
-		"OpenRouter" | "openrouter" ) read -p 'With wich model ? (type "man" for a manual installation): ' model ;;
-	esac
-		if [ "$model" == 'man' ] ; then
-			echo "manInstall"
-		fi
+	read -p "Set an OpenRouter api key: " apikey
+	sed -i "s/^OPENROUTER_API_KEY=.*/OPENROUTER_API_KEY="$apikey"/" .env
+	#read -p "You want to use your model with [OpenRouter]: " answer
+	#case "$answer" in
+	#	"OpenRouter" | "openrouter" ) read -p 'With wich model ? (type "man" for a manual installation): ' model ;;
+	#esac
+	#	if [ "$model" == 'man' ] ; then
+	#		echo "manInstall"
+	#	fi
 elif [ $# -eq 0 ] ; then
 	echo 'Welcome to askii!'
 	echo "Type "--help" if you do not know what to do."
@@ -36,7 +38,7 @@ elif [ "$1" == '-get' ] ; then
 	whiptail --textbox orTextbox 15 70
 
 elif [ "$1" == '-sound' ] ; then
-	read -p 'Want to enable sound answer? [Y/n]: ' activateSound
+	read -p 'Want to enable sound answer? (do not work) [Y/n]: ' activateSound
 	
 	case "$activateSound" in
     		[yY]|[yY])
@@ -55,14 +57,13 @@ else
 	object=$(jq -n --arg content "$*" '{
 	model: "deepseek/deepseek-chat:free",
 	messages: [
-    {role: "system", content: "You are a helpful assistant."},
-    {role: "user", content: $content}
-  ]
-}')
+    		{role: "system", content: "You are a helpful assistant."},
+    		{role: "user", content: $content}
+  	]
+	}')
 	
 	
 	curl https://openrouter.ai/api/v1/chat/completions   -H "Content-Type: application/json"   -H "Authorization: Bearer $OPENROUTER_API_KEY"   -d "$object" | jq -r '.choices[0].message.content'
-
 	
 fi
 
