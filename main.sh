@@ -20,15 +20,18 @@ if [ "$1" == '--help' ] ; then
 	echo "With ./main.sh -get, you will see a tutorial to learn how to get free AI api keys."
 	# echo "If you want audio answers, type askii -sound"
 elif [ "$1" == '-add' ] ; then
-	read -p "Set an OpenRouter api key: " apikey
-	sed -i "s/^OPENROUTER_API_KEY=.*/OPENROUTER_API_KEY="$apikey"/" .env
-	#read -p "You want to use your model with [OpenRouter]: " answer
-	#case "$answer" in
-	#	"OpenRouter" | "openrouter" ) read -p 'With wich model ? (type "man" for a manual installation): ' model ;;
-	#esac
-	#	if [ "$model" == 'man' ] ; then
-	#		echo "manInstall"
-	#	fi
+	read -p "You want to use your model with [OpenRouter]: " answer
+	case "$answer" in
+		"OpenRouter" | "openrouter" ) 
+		source ./openrouterSetup.sh
+		#read -p 'With wich model ? (type "man" for a manual installation): ' model
+		;;
+	esac
+		if [ "$model" == 'man' ] ; then
+			echo "manInstall"
+		elif [ "$model" == "openrouter" ] ; then
+			source ./openrouterSetup.sh
+		fi
 elif [ $# -eq 0 ] ; then
 	echo 'Welcome to askii!'
 	echo "Type "--help" if you do not know what to do."
