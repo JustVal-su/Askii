@@ -3,8 +3,13 @@
 # echo 'Welcome to askii!'
 # echo "Seems like you do not have any model configured."
 # echo "Try typing help if you do not know what to do."
+ENVFILE=.env
 
-source .env
+if [ -e "$ENVFILE" ] ; then
+	source .env
+else
+	touch .env
+fi
 
 LIST_FILE="./list.txt"
 
@@ -13,6 +18,18 @@ if [ ! -f "./list.txt" ] ; then
 #else
 	#echo "already created"
 fi
+
+while IFS='=' read -r key value; do
+  if [[ -n "$key" && ! "$key" =~ ^# ]]; then
+    if [[ "$key" == "$1" ]]; then
+      echo "key $key value $value"
+      break
+    fi
+  fi
+
+done < .env
+echo "a"
+echo "$key"
 
 if [ "$1" == '--help' ] ; then
 	echo "Askii is a cli app to interact with llm."
@@ -55,7 +72,19 @@ elif [ "$1" == '-sound' ] ; then
         		exit
         	;;
 	esac
+elif [ "$1" == "$key" ] ; then
+	object=$(jq -n --arg content "$*" '{
+	model: "mistralai/mistral-7b-instruct:free",
+	messages: [
+    		{role: "system", content: "You are a helpful assistant."},
+    		{role: "user", content: $content}
+  	]
+	}')
 	
+	
+	curl https://openrouter.ai/api/v1/chat/completions   -H "Content-Type: application/json"   -H "Authorization: Bearer $value"   -d "$object" | jq -r '.choices[0].message.content'
+	
+
 else
 	object=$(jq -n --arg content "$*" '{
 	model: "deepseek/deepseek-chat:free",
