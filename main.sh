@@ -24,6 +24,7 @@ while IFS='=' read -r key value; do
     if [[ "$key" == "$2" ]]; then
       echo "key $key value $value"
 	  keyName="$key"
+	  WORD=2
       break
     fi
   fi
@@ -73,10 +74,9 @@ elif [ "$1" == '-sound' ] ; then
         	;;
 	esac
 elif [ "$1" == "-n" ] ; then
-	echo "$key"
-	echo "$2"
+	cleanedPrompt=$(echo "$*" | sed "s/$1//g" | sed "s/$2//g")
 	if [ "$2" == "$key" ] ; then
-		object=$(jq -n --arg content "$*" '{
+		object=$(jq -n --arg content "$cleanedPrompt" '{
 		model: "mistralai/mistral-7b-instruct:free",
 		messages: [
     			{role: "system", content: "You are a helpful assistant."},
@@ -87,8 +87,6 @@ elif [ "$1" == "-n" ] ; then
 		curl https://openrouter.ai/api/v1/chat/completions   -H "Content-Type: application/json"   -H "Authorization: Bearer $value"   -d "$object" | jq -r '.choices[0].message.content'
 
 	fi
-	
-
 else
 	object=$(jq -n --arg content "$*" '{
 	model: "deepseek/deepseek-chat:free",
