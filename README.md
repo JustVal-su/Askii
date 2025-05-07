@@ -1,6 +1,6 @@
 # Askii
 A cli app to interact with llm.
-Work on linux.
+Work on linux and macOS.
 
 ## Add a key
 You can add an OpenRouter api key with /main.sh -add.

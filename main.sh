@@ -21,19 +21,19 @@ fi
 
 while IFS='=' read -r key value; do
   if [[ -n "$key" && ! "$key" =~ ^# ]]; then
-    if [[ "$key" == "$1" ]]; then
+    if [[ "$key" == "$2" ]]; then
       echo "key $key value $value"
+	  keyName="$key"
       break
     fi
   fi
 
 done < .env
-echo "a"
-echo "$key"
 
 if [ "$1" == '--help' ] ; then
 	echo "Askii is a cli app to interact with llm."
-	echo "You can add one model with ./main.sh -add."
+	echo "Try enter a prompt."
+	echo "You can add one api key with ./main.sh -add."
 	echo "With ./main.sh -get, you will see a tutorial to learn how to get free AI api keys."
 	# echo "If you want audio answers, type askii -sound"
 elif [ "$1" == '-add' ] ; then
@@ -72,17 +72,21 @@ elif [ "$1" == '-sound' ] ; then
         		exit
         	;;
 	esac
-elif [ "$1" == "$key" ] ; then
-	object=$(jq -n --arg content "$*" '{
-	model: "mistralai/mistral-7b-instruct:free",
-	messages: [
-    		{role: "system", content: "You are a helpful assistant."},
-    		{role: "user", content: $content}
-  	]
-	}')
+elif [ "$1" == "-n" ] ; then
+	echo "$key"
+	echo "$2"
+	if [ "$2" == "$key" ] ; then
+		object=$(jq -n --arg content "$*" '{
+		model: "mistralai/mistral-7b-instruct:free",
+		messages: [
+    			{role: "system", content: "You are a helpful assistant."},
+    			{role: "user", content: $content}
+  		]
+		}')
 	
-	
-	curl https://openrouter.ai/api/v1/chat/completions   -H "Content-Type: application/json"   -H "Authorization: Bearer $value"   -d "$object" | jq -r '.choices[0].message.content'
+		curl https://openrouter.ai/api/v1/chat/completions   -H "Content-Type: application/json"   -H "Authorization: Bearer $value"   -d "$object" | jq -r '.choices[0].message.content'
+
+	fi
 	
 
 else
@@ -100,5 +104,5 @@ else
 fi
 
 #utile : pour compter combien de lettres on été reçus, ${#var}
-	
+
 exit
